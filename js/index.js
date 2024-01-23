@@ -3,9 +3,9 @@ const baseUrl = 'https://api.github.com';
 document.addEventListener('DOMContentLoaded', () => {
 
   function formEvent(event) {
-    event.preventDefault();
-
-    const searchValue = document.getElementById('search').value;
+    event.preventDefault()
+    const search = document.getElementById('search')
+    const searchValue = search.value
     const searchEndpointURL = `${baseUrl}/search/users?q=${searchValue}`;
 
     fetch(searchEndpointURL)
@@ -13,52 +13,60 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(data => {
         const dataDisplay = document.getElementById('github-container');
         // Clear the previous results
-        dataDisplay.innerHTML = '';
+        dataDisplay.innerHTML = ''
+        const filteredArray = data.items.filter(user => (user.login === searchValue))
 
-        data.items.forEach(user => {
-          const username = user.login;
-          const avatarUrl = user.avatar_url;
-          const profileUrl = user.html_url;
+        filteredArray.forEach(user => {
+            const userElement = document.createElement('div')
 
-          const userElement = document.createElement('div');
-          userElement.innerHTML = `
-            <h3>${username}</h3>
-            <img src="${avatarUrl}" alt="${username}'s avatar">
-            <a href="${profileUrl}" target="_blank">Profile</a>
-          `;
+            const usernameContainer = document.createElement('h3')
+            usernameContainer.innerHTML = user.login
 
-          userElement.addEventListener('click', () => {
-            clickUserEvent(username);
-          });
+            const avatarContainer = document.createElement('img')
+            avatarContainer.src = user.avatar_url
 
-          dataDisplay.appendChild(userElement);
-        });
+            const profileContainer = document.createElement('a')
+            profileContainer.setAttribute('href',`${user.html_url}`)
+            profileContainer.innerHTML = user.html_url
+  
+            userElement.appendChild(usernameContainer)
+            userElement.appendChild(avatarContainer)
+            userElement.appendChild(profileContainer)
+  
+            usernameContainer.addEventListener('click', () => { clickUserEvent() })
+  
+            dataDisplay.appendChild(userElement);
+          })
       });
   }
 
-  function clickUserEvent(username) {
-    const userReposEndpointURL = `${baseUrl}/users/${username}/repos`;
+  function clickUserEvent() {
+    const user = document.querySelector('h3')
+    const userReposEndpointURL = `${baseUrl}/users/${user.innerText}/repos`;
 
     fetch(userReposEndpointURL)
       .then(res => res.json())
       .then(data => {
         const dataDisplay = document.getElementById('github-container');
         // Clear the previous results
-        dataDisplay.innerHTML = '';
+        dataDisplay.innerHTML = ''
 
         data.forEach(repo => {
-          const repoName = repo.name;
-          const repoUrl = repo.html_url;
-
           const repoElement = document.createElement('div');
-          repoElement.innerHTML = `
-            <h3>${repoName}</h3>
-            <a href="${repoUrl}" target="_blank">Repository</a>
-          `;
+
+          const repoNameContainer = document.createElement('h3')
+          repoNameContainer.innerHTML = repo.name
+
+          const repoUrlContainer = document.createElement('a')
+          repoUrlContainer.setAttribute = ('href', `${repo.html_url}`)
+          repoNameContainer.innerHTML = repo.html_url
+
+          repoElement.appendChild(repoNameContainer)
+          repoElement.appendChild(repoUrlContainer)
 
           dataDisplay.appendChild(repoElement);
-        });
-      });
+        })
+      })
   }
 
   const form = document.getElementById('github-form');
